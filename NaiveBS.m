@@ -1,8 +1,23 @@
 function Res = NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
+
+%{
+This functino does the Naive Background Subtraction.
+input:
+- VideoMat : 4 dimension matrix of the form (height, width, # of color channels, frame #)
+- C : Can be 0 or 1. 1 means that the result will be truecolor, 0 means graystyle.
+- O : Define if output is the Mask (1) or frames(0)
+- N : Number of frames to do CreateBackgoundAverage on. (N >= 0)
+- Mean : 
+- Threshold : A number. The sensitivity factor for deciding if a pixel is background or foreground.
+- Selective : 
+- LearningRate : 
+
+Usage exaple:
+%}
+
 MatDimension = size(VideoMat);
-%If we choose color images the dimensions are the same, otherwise only gray
-%level
-%We will preallocate memory to increase performance
+%If we choose color images the dimensions are the same, otherwise only gray level.
+%We will preallocate memory to increase performance.
 fprintf('Starting...\n');
 if (C == 1)
     fprintf('Preparing color result matrix\n');
