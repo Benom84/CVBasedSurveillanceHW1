@@ -1,5 +1,18 @@
 function Background = UpdateBackgroundAverage(VideoMat, CurrentBackground, CurrentFrame,LearningRate, Selective, FrameChanges)
+%{
+Updates appearance of the background. Higher learning rate == the latest
+frames are affecting faster.
 
+- VideoMat : the newest frames.
+- CurrentBackground : the current background that we are about to update.
+- CurrentFrame : the current frame we are going to update the backgound
+for.
+- LearningRate : how strong the new frames are going to affect the
+background. '0' is no effect, '1' is replacing the whole current background
+with the new frames.
+- Selective : 
+- FrameChanges : 
+%}
 if (nargin < 3)
     error('Must pass VideoMat, BackgroundAverage and CurrentFrame');
 end

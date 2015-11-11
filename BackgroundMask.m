@@ -1,4 +1,12 @@
 function Mask = BackgroundMask(VideoMat, BackgroundAverage, FrameNumber, Threshold)
+%{
+Creates a 'black & white' image represented by a matrix.
+after subtracting the background-average from the original image, each
+pixel will hold a certain value. If the value is below the threshold, the
+pixel belongs to the background (with 0 value), otherwise to the foreground (value 255).
+
+The result is a black & white matrix representing background & foreground.
+%}
 if (nargin < 3)
     error('Must pass VideoMat, BackgroundAverage and FrameNumber');
 end

@@ -10,7 +10,9 @@ input:
 - Mean : 
 - Threshold : A number. The sensitivity factor for deciding if a pixel is background or foreground.
 - Selective : 
-- LearningRate : 
+- LearningRate : determine the weight-ratio between the lastest frames and
+former frames. LearningRate > 0.5 meanes higher weight to new frames, where
+< 0.5 means lower.
 
 Usage exaple:
 %}
@@ -51,10 +53,12 @@ end
 fprintf('Preparing Output\n');
 if (O == 1)
     fprintf('Output is mask\n');
+    %the result is all frames in MaskSequence which are white (= foreground)
     result = reshape(MaskSequence == 255, [MatDimension(1) MatDimension(2) 1 MatDimension(4)]);
 else
     fprintf('Output is frames\n');
     if (C == 1)
+        %What's going on here?
         ColorMaskSequence = reshape(MaskSequence, MatDimension(1)*MatDimension(2), []);
         size(ColorMaskSequence)
         ColorMaskSequence = reshape(repmat(ColorMaskSequence,3,1),...
