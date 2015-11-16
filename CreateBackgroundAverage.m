@@ -13,7 +13,7 @@ Mean - boolean which points how to calculate the acerage. 1 is 'mean' function, 
 MatDimension = size(VideoMat);
 
 %This line is needed? result is not defined:
-%result = zeros(MatFimension(1), MatDimension(2), MatDimension(3), 'uint8');
+%result = zeros(MatDimension(1), MatDimension(2), MatDimension(3), 'uint8');
 
 if (Mean == 1)
     for i = 1:MatDimension(1)

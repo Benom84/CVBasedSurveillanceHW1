@@ -22,13 +22,15 @@ CurrentFrameImage = squeeze(VideoMat(:,:,:,FrameNumber));
 
 if (MatDimension(3) ~= 1)
     thresholdSqr = Threshold^2;
-    differenceMatrix = CurrentFrameImage - BackgroundAverage;
-    differenceMatrixSqr = uint16(differenceMatrix) .* uint16(differenceMatrix);
-    differenceMatrixSqrSum = sum(differenceMatrixSqr,3);
-    result(differenceMatrixSqrSum >= thresholdSqr | differenceMatrixSqrSum <= -thresholdSqr) = 255;
+    differenceMatrix = abs(CurrentFrameImage - BackgroundAverage);
+    %differenceMatrixSqr = uint16(differenceMatrix) .* uint16(differenceMatrix);
+    %differenceMatrixSqrSum = sum(differenceMatrixSqr,3);
+    differenceMatrixSum = sum(differenceMatrix,3);
+    %result(differenceMatrixSqrSum >= thresholdSqr | differenceMatrixSqrSum <= -thresholdSqr) = 255;
+    result(differenceMatrixSum >= Threshold) = 255;
 else
-    differenceMatrix = CurrentFrameImage - BackgroundAverage;
-    result(differenceMatrix >= Threshold | differenceMatrix <= -Threshold) = 255;
+    differenceMatrix = abs(CurrentFrameImage - BackgroundAverage);
+    result(differenceMatrix >= Threshold) = 255;
 end
 
 Mask = result;
