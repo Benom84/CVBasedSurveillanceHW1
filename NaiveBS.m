@@ -1,21 +1,20 @@
 function Res = NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
-
-%{
-This functino does the Naive Background Subtraction.
-input:
-- VideoMat : 4 dimension matrix of the form (height, width, # of color channels, frame #)
-- C : Can be 0 or 1. 1 means that the result will be truecolor, 0 means graystyle.
-- O : Define if output is the Mask (1) or frames(0)
-- N : Number of frames to do CreateBackgoundAverage on. (N >= 0)
-- Mean : 
-- Threshold : A number. The sensitivity factor for deciding if a pixel is background or foreground.
-- Selective : 
-- LearningRate : determine the weight-ratio between the lastest frames and
-former frames. LearningRate > 0.5 meanes higher weight to new frames, where
-< 0.5 means lower.
-
-Usage exaple:
-%}
+%NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
+%This functino does the Naive Background Subtraction.
+%input:
+%- VideoMat : 4 dimension matrix of the form (height, width, # of color channels, frame #)
+%- C : Can be 0 or 1. 1 means that the result will be truecolor, 0 means graystyle.
+%- O : Define if output is the Mask (1) or frames(0)
+%- N : Number of frames to do CreateBackgoundAverage on. (N >= 0)
+%- Mean : 
+%- Threshold : A number. The sensitivity factor for deciding if a pixel is background or foreground.
+%- Selective : 
+%- LearningRate : determine the weight-ratio between the lastest frames and
+%former frames. LearningRate > 0.5 meanes higher weight to new frames, where
+%< 0.5 means lower.
+%
+%Usage exaple:
+%
 
 MatDimension = size(VideoMat);
 %If we choose color images the dimensions are the same, otherwise only gray level.
@@ -28,6 +27,8 @@ if (C == 1)
 else
     fprintf('Preparing gray result matrix\n');
     result = uint8(zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4)));
+    
+    %Transform the entire video to gray levels
     updatedVideo = uint8(zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4)));
     fprintf('Modifying the movie to gray levels\n');
     for i = 1:MatDimension(4)
@@ -46,7 +47,7 @@ for i = 1 : MatDimension(4)
     CurrentMask = BackgroundMask(updatedVideo, BackgroundAverage, i, Threshold);
     MaskSequence(:,:,i) = CurrentMask(:,:);
     if (i > N)
-        BackgroundAverage = UpdateBackgroundAverage(updatedVideo, BackgroundAverage, i, LearningRate, Selective, squeeze(MaskSequence(:,:,i)));
+        BackgroundAverage = UpdateBackgroundAverage(updatedVideo, BackgroundAverage, i, LearningRate, Mean, Selective, squeeze(MaskSequence(:,:,i)), N);
     end
 end
 
@@ -58,12 +59,12 @@ if (O == 1)
 else
     fprintf('Output is frames\n');
     if (C == 1)
-        %What's going on here?
+        %If it is a color output we need to take the mask and duplicate the
+        %3rd dimension 3 times. We do this by creating a vector from the
+        %matrix and then refolding it to a matrix
         ColorMaskSequence = reshape(MaskSequence, MatDimension(1)*MatDimension(2), []);
-        size(ColorMaskSequence)
         ColorMaskSequence = reshape(repmat(ColorMaskSequence,3,1),...
             [MatDimension(1) MatDimension(2) 3 MatDimension(4)]);
-        size(ColorMaskSequence)
         result(ColorMaskSequence > 0) = updatedVideo(ColorMaskSequence > 0);
 
     else
