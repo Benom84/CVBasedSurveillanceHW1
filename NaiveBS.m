@@ -5,7 +5,7 @@ This functino does the Naive Background Subtraction.
 input:
 - VideoMat : 4 dimension matrix of the form (height, width, # of color channels, frame #)
 - C : Can be 0 or 1. 1 means that the result will be truecolor, 0 means graystyle.
-- O : Define if output is the Mask (1) or frames(0)
+- O : Define if output is the Binary (1) or color-dependent(0)
 - N : Number of frames to do CreateBackgoundAverage on. (N >= 0)
 - Mean : 
 - Threshold : A number. The sensitivity factor for deciding if a pixel is background or foreground.
@@ -37,14 +37,19 @@ else
 end
 
 fprintf('Creating background average\n');
+%Create background average from the first N frames.
 BackgroundAverage = CreateBackgroundAverage(updatedVideo, N, Mean);
 fprintf('Preparing mask sequence matrix\n');
 MaskSequence = uint8(zeros(MatDimension(1), MatDimension(2), MatDimension(4)));
 
 fprintf('Generating mask for each frame\n');
 for i = 1 : MatDimension(4)
+    %Create mask for every frame.
     CurrentMask = BackgroundMask(updatedVideo, BackgroundAverage, i, Threshold);
     MaskSequence(:,:,i) = CurrentMask(:,:);
+    
+    %For the frames after the Nth, we need to update background, by the
+    %formula given in the lectures.
     if (i > N)
         BackgroundAverage = UpdateBackgroundAverage(updatedVideo, BackgroundAverage, i, LearningRate, Selective, squeeze(MaskSequence(:,:,i)));
     end
