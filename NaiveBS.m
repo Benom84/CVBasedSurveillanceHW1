@@ -28,6 +28,8 @@ if (C == 1)
 else
     fprintf('Preparing gray result matrix\n');
     result = uint8(zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4)));
+    
+    %Transform the entire video to gray levels
     updatedVideo = uint8(zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4)));
     fprintf('Modifying the movie to gray levels\n');
     for i = 1:MatDimension(4)
@@ -51,7 +53,7 @@ for i = 1 : MatDimension(4)
     %For the frames after the Nth, we need to update background, by the
     %formula given in the lectures.
     if (i > N)
-        BackgroundAverage = UpdateBackgroundAverage(updatedVideo, BackgroundAverage, i, LearningRate, Selective, squeeze(MaskSequence(:,:,i)));
+        BackgroundAverage = UpdateBackgroundAverage(updatedVideo, BackgroundAverage, i, LearningRate, Mean, Selective, squeeze(MaskSequence(:,:,i)), N);
     end
 end
 
@@ -63,12 +65,12 @@ if (O == 1)
 else
     fprintf('Output is frames\n');
     if (C == 1)
-        %What's going on here?
+        %If it is a color output we need to take the mask and duplicate the
+        %3rd dimension 3 times. We do this by creating a vector from the
+        %matrix and then refolding it to a matrix
         ColorMaskSequence = reshape(MaskSequence, MatDimension(1)*MatDimension(2), []);
-        size(ColorMaskSequence)
         ColorMaskSequence = reshape(repmat(ColorMaskSequence,3,1),...
             [MatDimension(1) MatDimension(2) 3 MatDimension(4)]);
-        size(ColorMaskSequence)
         result(ColorMaskSequence > 0) = updatedVideo(ColorMaskSequence > 0);
 
     else
