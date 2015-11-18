@@ -42,9 +42,11 @@ if (Mean == 1)
     else
         currentBackgroundLocation = (FrameChanges == 0);
         currentFrame = squeeze(VideoMat(:,:,:,CurrentFrameNum));
-        result = CurrentBackground;
-        result(currentBackgroundLocation) = currentFrame(currentBackgroundLocation) * LearningRate...
+        result = currentFrame(currentBackgroundLocation) * LearningRate...
             + CurrentBackground(currentBackgroundLocation) * (1 - LearningRate);
+        result = reshape(result, 
+        
+        
     end
 else
     if (Selective == 0)

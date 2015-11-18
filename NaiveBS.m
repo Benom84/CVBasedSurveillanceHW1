@@ -6,7 +6,7 @@ function Res = NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
 %- C : Can be 0 or 1. 1 means that the result will be truecolor, 0 means graystyle.
 %- O : Define if output is the Mask (1) or frames(0)
 %- N : Number of frames to do CreateBackgoundAverage on. (N >= 0)
-%- Mean : 
+%- Mean : 1 To use a mean to create the background and 0 to use median
 %- Threshold : A number. The sensitivity factor for deciding if a pixel is background or foreground.
 %- Selective : 
 %- LearningRate : determine the weight-ratio between the lastest frames and

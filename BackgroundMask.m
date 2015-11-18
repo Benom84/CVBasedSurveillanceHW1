@@ -25,6 +25,8 @@ if (MatDimension(3) ~= 1)
     differenceMatrixSum = sum(differenceMatrix,3);
     result(differenceMatrixSum >= 3*Threshold) = 255;
 else
+    size(CurrentFrameImage)
+    size(BackgroundAverage)
     differenceMatrix = abs(CurrentFrameImage - BackgroundAverage);
     result(differenceMatrix >= Threshold) = 255;
 end
