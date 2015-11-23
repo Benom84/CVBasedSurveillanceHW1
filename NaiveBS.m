@@ -22,14 +22,14 @@ MatDimension = size(VideoMat);
 fprintf('Starting...\n');
 if (C == 1)
     fprintf('Preparing color result matrix\n');
-    result = uint8(zeros(MatDimension(1), MatDimension(2), 3, MatDimension(4)));
-    updatedVideo = VideoMat;
+    result = zeros(MatDimension(1), MatDimension(2), 3, MatDimension(4), 'uint8');
+    updatedVideo = int16(VideoMat);
 else
     fprintf('Preparing gray result matrix\n');
-    result = uint8(zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4)));
+    result = zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4), 'uint8');
     
     %Transform the entire video to gray levels
-    updatedVideo = uint8(zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4)));
+    updatedVideo = zeros(MatDimension(1), MatDimension(2), 1, MatDimension(4), 'int16');
     fprintf('Modifying the movie to gray levels\n');
     for i = 1:MatDimension(4)
         grayFrame = rgb2gray(squeeze(VideoMat(:,:,:,i)));
@@ -40,7 +40,7 @@ end
 fprintf('Creating background average\n');
 BackgroundAverage = CreateBackgroundAverage(updatedVideo, N, Mean);
 fprintf('Preparing mask sequence matrix\n');
-MaskSequence = uint8(zeros(MatDimension(1), MatDimension(2), MatDimension(4)));
+MaskSequence = zeros(MatDimension(1), MatDimension(2), MatDimension(4));
 
 fprintf('Generating mask for each frame\n');
 for i = 1 : MatDimension(4)

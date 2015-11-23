@@ -13,7 +13,7 @@ Mean - boolean which points how to calculate the acerage. 1 is 'mean' function, 
 MatDimension = size(VideoMat);
 
 %This line is needed? result is not defined:
-result = zeros(MatDimension(1), MatDimension(2), MatDimension(3), 'uint8');
+result = zeros(MatDimension(1), MatDimension(2), MatDimension(3));
 
 
 %If we calculate the starting background as Mean then for each pixel we
@@ -29,4 +29,4 @@ else
     result = median(VideoMat(:, :, :, 1:N), 4);
 end
 
-Background = uint8(result);
+Background = int16(result);
