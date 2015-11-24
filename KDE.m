@@ -49,7 +49,11 @@ for i = N + 1 : MatDimension(4)
     if (Selective == 1)
         CurrentMask = BackgroundMaskKDE(updatedVideo, N, i, Threshold, PixelValues, PixelValuesIndex);
     else
+        PixelValues = updatedVideo(:,:,i - N:i - 1);
         CurrentMask = BackgroundMaskKDE(updatedVideo, N, i, Threshold, PixelValues);
+    end
+    if (mod(i,100) == 0)
+        fprintf('Mask for frame: %d\n', i);
     end
     MaskSequence(:,:,i) = CurrentMask(:,:);
 end
