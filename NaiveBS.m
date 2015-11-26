@@ -16,6 +16,9 @@ function Res = NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
 %Usage exaple:
 %
 
+ if (mod(N, 2) == 0)
+    N = N + 1; %Median is 30 times faster for odd numbers
+end
 MatDimension = size(VideoMat);
 %If we choose color images the dimensions are the same, otherwise only gray level.
 %We will preallocate memory to increase performance.
