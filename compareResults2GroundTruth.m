@@ -24,5 +24,8 @@ function [truePosRate, trueNegRate, falsePosRate, falseNegRate] = compareResults
     Precision= sum(sum(forBackResultIm.*(~realGroundTruthIm)))./sum(sum(forBackResultIm==1));
     % get all entries with forBackResultIm == 0 and groundTruthIm == 1
     NPV = sum(sum((~forBackResultIm).*realGroundTruthIm))./sum(sum(forBackResultIm==0));
+    falsePosRate = 1;
+    falseNegRate = 1;
+    
     
 end

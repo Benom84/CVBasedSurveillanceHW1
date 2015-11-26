@@ -15,7 +15,7 @@ if (nargin < 4)
 end
 
 MatDimension = size(VideoMat);
-result = zeros(MatDimension(1), MatDimension(2));
+result = false(MatDimension(1), MatDimension(2));
 
 CurrentFrameImage = squeeze(VideoMat(:,:,:,FrameNumber));
 
@@ -23,12 +23,10 @@ CurrentFrameImage = squeeze(VideoMat(:,:,:,FrameNumber));
 if (MatDimension(3) ~= 1)
     differenceMatrix = abs(CurrentFrameImage - BackgroundAverage);
     differenceMatrixSum = sum(differenceMatrix,3);
-    result(differenceMatrixSum >= 3*Threshold) = 255;
+    result(differenceMatrixSum >= 3*Threshold) = true;
 else
-    size(CurrentFrameImage);
-    size(BackgroundAverage);
     differenceMatrix = abs(CurrentFrameImage - BackgroundAverage);
-    result(differenceMatrix >= Threshold) = 255;
+    result(differenceMatrix >= Threshold) = true;
 end
 
 Mask = result;

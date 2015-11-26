@@ -1,4 +1,4 @@
-function Res = NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
+function Res = NaiveBS(VideoMat,C,O,N,Mean,Threshold, LearningRate)
 %NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
 %This functino does the Naive Background Subtraction.
 %input:
@@ -8,15 +8,12 @@ function Res = NaiveBS(VideoMat,C,O,N,Mean,Threshold, Selective, LearningRate)
 %- N : Number of frames to do CreateBackgoundAverage on. (N >= 0)
 %- Mean : 1 To use a mean to create the background and 0 to use median
 %- Threshold : A number. The sensitivity factor for deciding if a pixel is background or foreground.
-%- Selective : 
 %- LearningRate : determine the weight-ratio between the lastest frames and
 %former frames. LearningRate > 0.5 meanes higher weight to new frames, where
 %< 0.5 means lower.
 %
-%Usage exaple:
-%
 
- if (mod(N, 2) == 0)
+if (mod(N, 2) == 0)
     N = N + 1; %Median is 30 times faster for odd numbers
 end
 MatDimension = size(VideoMat);
@@ -43,14 +40,14 @@ end
 fprintf('Creating background average\n');
 BackgroundAverage = CreateBackgroundAverage(updatedVideo, N, Mean);
 fprintf('Preparing mask sequence matrix\n');
-MaskSequence = zeros(MatDimension(1), MatDimension(2), MatDimension(4));
+MaskSequence = false(MatDimension(1), MatDimension(2), MatDimension(4));
 
 fprintf('Generating mask for each frame\n');
 for i = 1 : MatDimension(4)
     CurrentMask = BackgroundMask(updatedVideo, BackgroundAverage, i, Threshold);
     MaskSequence(:,:,i) = CurrentMask(:,:);
     if (i > N)
-        BackgroundAverage = UpdateBackgroundAverage(updatedVideo, BackgroundAverage, i, LearningRate, Mean, Selective, squeeze(MaskSequence(:,:,i)), N);
+        BackgroundAverage = UpdateBackgroundAverage(updatedVideo, BackgroundAverage, i, LearningRate, Mean, N);
     end
 end
 
@@ -58,20 +55,21 @@ fprintf('Preparing Output\n');
 if (O == 1)
     fprintf('Output is mask\n');
     %the result is all frames in MaskSequence which are white (= foreground)
-    result = reshape(MaskSequence == 255, [MatDimension(1) MatDimension(2) 1 MatDimension(4)]);
+    %result = reshape(MaskSequence == true, [MatDimension(1) MatDimension(2) 1 MatDimension(4)]);
+    result = MaskSequence;
 else
     fprintf('Output is frames\n');
     if (C == 1)
         %If it is a color output we need to take the mask and duplicate the
         %3rd dimension 3 times. We do this by creating a vector from the
         %matrix and then refolding it to a matrix
-        ColorMaskSequence = reshape(MaskSequence, MatDimension(1)*MatDimension(2), []);
+        ColorMaskSequence = reshape(MaskSequence, MatDimension(1) * MatDimension(2), []);
         ColorMaskSequence = reshape(repmat(ColorMaskSequence,3,1),...
             [MatDimension(1) MatDimension(2) 3 MatDimension(4)]);
         result(ColorMaskSequence > 0) = updatedVideo(ColorMaskSequence > 0);
 
     else
-        result(MaskSequence > 0) = updatedVideo(MaskSequence > 0);
+        result(MaskSequence) = updatedVideo(MaskSequence);
     end
 end
 fprintf('Finished!\n');
