@@ -41,6 +41,6 @@ function [truePosRate, trueNegRate, Precision, NPV, FPR, FNR] = compareResults2G
     FPR = 1 - trueNegRate;
     FNR = 1 - truePosRate;
     
-    %display(FPR);
-    %display(FNR);
+    %display(FPR);     
+    %display(FNR);     
 end
