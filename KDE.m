@@ -44,7 +44,6 @@ end
 
 
 fprintf('Generating mask for each frame\n');
-tic
 for i = N + 1 : MatDimension(4)
     
     [BackgroundMask, CurrentMask] = BackgroundMaskKDE(updatedVideo, N, i, Threshold, PixelValuesShortHistory);
@@ -73,13 +72,10 @@ for i = N + 1 : MatDimension(4)
         
     end
     
-    if (mod(i,100) == 0)
-        fprintf('Mask for frame: %d\n', i);
-    end
     MaskSequence(:,:,i) = CurrentMask(:,:);
 end
 %PixelValuesIndex
-toc
+
 
 fprintf('Preparing Output\n');
 if (O == 1)
