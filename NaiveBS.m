@@ -23,6 +23,13 @@ fprintf('Starting...\n');
 if (C == 1)
     fprintf('Preparing color result matrix\n');
     result = zeros(MatDimension(1), MatDimension(2), 3, MatDimension(4), 'uint8');
+    
+    %This is important one: on one side, the video itself is in the "uint8"
+    %range. On the other, we can't perform subtraction correctly on uint8
+    %because there are no negative values, and when performing 50 - 90, the
+    %result is 0 and not -40. And we need the absolute value. Therefore we
+    %are using INT16 representation which can hold both all the color range
+    %and negative values.
     updatedVideo = int16(VideoMat);
 else
     fprintf('Preparing gray result matrix\n');
