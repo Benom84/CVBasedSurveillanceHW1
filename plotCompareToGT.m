@@ -9,7 +9,7 @@ fprs = zeros(framesNum);
 fnrs = zeros(framesNum);
 
 for i=1 : framesNum
-    [fpr, fnr] = compareResults2GroundTruth(resultVideo(:,:,i), gtVideo(:,:,i));
+    [~,~,~,~,fpr, fnr] = compareResults2GroundTruth(resultVideo(:,:,i), gtVideo(:,:,i));
     fprs(i) = fpr;
     fnrs(i) = fnr;
 end
