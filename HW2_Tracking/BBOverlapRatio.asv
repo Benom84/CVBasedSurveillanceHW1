@@ -1,7 +1,4 @@
-function result = BoundingBoxOverlap(BBox1, BBox2)
-%BoundingBoxOverlap(BBox1, BBox2) Checks whether 2 bounding boxes overlap
-%at all
-
+function result = BBOverlapRatio(BBox1, BBox2)
 
     BBox1XMin = BBox1(1);
     BBox1XMax = BBox1XMin + BBox1(3);
@@ -12,6 +9,15 @@ function result = BoundingBoxOverlap(BBox1, BBox2)
     BBox2XMax = BBox2XMin + BBox2(3);
     BBox2YMin = BBox2(2);
     BBox2YMax = BBox2YMin + BBox2(4);
+    
+    sumOfBB = BBox1(3) * BBox1(4) + BBox2(3) * BBox2(4);
+    xOverlap = max(0, min(
+    if (sharedArea <= 0)
+        result = 0;
+    else
+       result =  
+    end
+    
 
     result = 0;
     if ~((BBox1XMax < BBox2XMin) || (BBox1XMin > BBox2XMax))
