@@ -32,8 +32,7 @@ ColoredBoundingBoxMatrix = ColoredBoundingBoxes(bboxes, ColorsMatrix);
 %For each frame, draw a bounding-box around tracked blobs.
 for i=1 : MatDim(4)
     [~, ~, bboxes] = blobAnalyzer.step(nbs_binary(:,:,i));
-    %'ColoredBoundingBoxes' function keeps the same color for the same
-    %blob.
+    %'ColoredBoundingBoxes' function ke
     ColoredBoundingBoxMatrix = ColoredBoundingBoxes(bboxes, ColorsMatrix, ColoredBoundingBoxMatrix);
     if (i == 77 || i == 78)
         fprintf('On frame:%d\n',i);
@@ -43,8 +42,6 @@ for i=1 : MatDim(4)
         ColoredBoundingBoxMatrix
         
     end
-    
-    %For each blob, draw the bbox around it.
     framebox = VideoMat(:,:,:,i);
     for j = 1 : size(ColoredBoundingBoxMatrix, 1)
         color = ColorsMatrix(ColoredBoundingBoxMatrix(j,5), :);
