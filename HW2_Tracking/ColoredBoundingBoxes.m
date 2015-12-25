@@ -2,7 +2,7 @@ function result = ColoredBoundingBoxes(BoundingBoxes, ColorsMatrix, oldBoundingB
 %COLOREDBOUNDINGBOXES Summary of this function goes here
 %   Detailed explanation goes here
 
-BoundingBoxesWithColors = zeros(size(BoundingBoxes, 1), 5);
+BoundingBoxesWithColors = zeros(size(BoundingBoxes, 1), 5, 'int32');
 
 if (nargin <= 2)
     for i= 1:size(BoundingBoxes, 1)
@@ -35,6 +35,9 @@ else
     
     %Make sure there are no duplicate colors
     MaxColorIndex = max(BoundingBoxesWithColors(:, 5));
+    if (isempty(MaxColorIndex))
+        MaxColorIndex = 0;
+    end
     for currentColorIndex = 1 : MaxColorIndex
         numberOfSimilarColorBoxes = ...
             size(BoundingBoxesWithColors(BoundingBoxesWithColors(:,5) == currentColorIndex,:), 1);
@@ -49,7 +52,8 @@ else
             end
         end
     end
-        
+    
+    
 end
 
 result = BoundingBoxesWithColors;
