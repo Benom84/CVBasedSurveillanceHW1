@@ -2,28 +2,28 @@ NUM_OF_BINS = 6;
 
 %--------------------------------------------------------------------------
 % creating objects to track
-% model_box = [left top right bottom]
+% coords = [left top right bottom]
 % histogram = 1xNUM_OF_BINS matrix
 % frames = the range of frames to perform the search for the object on.
 % color = the color of the rectangle for each object
 % size = the object size, for the exhaustive research
 %--------------------------------------------------------------------------
-objects = struct('model_box', {}, ...
+objects = struct('coords', {}, ...
                  'histogram', {}, ...
                  'frames', {}, ...
                  'color', {}, ...
                  'size', {});
 
 %location of the model [left top right bottom]
-objects(1).model_box = [413 213 442 291];
+objects(1).coords = [413 213 442 291];
 objects(1).frames = struct('start', 1, 'end', 27);
 objects(1).color = 'red';
 
-objects(2).model_box = [344 232 347 244];
+objects(2).coords = [344 232 347 244];
 objects(2).frames = struct('start', 1, 'end', 19);
 objects(2).color = 'blue';
 
-objects(3).model_box = [374 229 380 240];
+objects(3).coords = [374 229 380 240];
 objects(3).frames = struct('start', 1, 'end', 11);
 objects(3).color = 'green';
 %--------------------------------------------------------------------------
@@ -53,8 +53,8 @@ prev_frame = imresize(uint8(orig_video(:,:,:,1)), 0.5);
 
 %make histogram for every model
 for o = 1:numel(objects)
-    model_area = prev_frame(objects(o).model_box(2):objects(o).model_box(4), objects(o).model_box(1):objects(o).model_box(3),:);
-    objects(o).histogram = histcounts(prev_model_area, NUM_OF_BINS);
+    model_area = prev_frame(objects(o).coords(2):objects(o).coords(4), objects(o).coords(1):objects(o).coords(3),:);
+    objects(o).histogram = histcounts(model_area, NUM_OF_BINS);
     objects(o).size = size(model_area);
 end
 
@@ -83,10 +83,10 @@ for i = 2:frames_num
         end
         
         %define where in the next frame to search for the model.
-        search_region_left = 2*objects(o).model_box(1) - objects(o).model_box(3);
-        search_region_top = 2*objects(o).model_box(2) - objects(o).model_box(4);
-        search_region_right = min(2*objects(o).model_box(3) - objects(o).model_box(1), new_video_size(2));
-        search_region_bottom = min(2*objects(o).model_box(4) - objects(o).model_box(2), new_video_size(1)); 
+        search_region_left = 2*objects(o).coords(1) - objects(o).coords(3);
+        search_region_top = 2*objects(o).coords(2) - objects(o).coords(4);
+        search_region_right = min(2*objects(o).coords(3) - objects(o).coords(1), new_video_size(2));
+        search_region_bottom = min(2*objects(o).coords(4) - objects(o).coords(2), new_video_size(1)); 
         
         %[left top right bottom]
         search_region_box = [search_region_left, search_region_top, search_region_right, search_region_bottom];
@@ -96,19 +96,19 @@ for i = 2:frames_num
         search_region_ih = getIntegralHistogram(search_region_area, NUM_OF_BINS);
         
         %find the new model in the new frame (the closest match to the model)
-        [cur_model_histogram, cur_model_box] = findBestIhModel(search_region_ih, objects(o).size, objects(o).histogram, NUM_OF_BINS);
-        cur_model_box = [search_region_box(1)+cur_model_box(1) ...
-                         search_region_box(2)+cur_model_box(2) ...
-                         search_region_box(1)+cur_model_box(3) ...
-                         search_region_box(2)+cur_model_box(4)];
+        [cur_model_histogram, cur_coords] = findBestIhModel(search_region_ih, objects(o).size, objects(o).histogram, NUM_OF_BINS);
+        cur_coords = [search_region_box(1)+cur_coords(1) ...
+                         search_region_box(2)+cur_coords(2) ...
+                         search_region_box(1)+cur_coords(3) ...
+                         search_region_box(2)+cur_coords(4)];
                      
         %draw the frame
-        bbox = [cur_model_box(1) cur_model_box(2) cur_model_box(3)-cur_model_box(1) cur_model_box(4)-cur_model_box(2)];
+        bbox = [cur_coords(1) cur_coords(2) cur_coords(3)-cur_coords(1) cur_coords(4)-cur_coords(2)];
         cur_frame_painted = insertShape(cur_frame_painted, 'Rectangle', bbox, 'LineWidth', 2,'color', objects(o).color);
         
         %update the model to track on.
         objects(o).histogram = cur_model_histogram;
-        objects(o).model_box = cur_model_box;
+        objects(o).coords = cur_coords;
     end
     
     new_video(:,:,:,i) = cur_frame_painted;
