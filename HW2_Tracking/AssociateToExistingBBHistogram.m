@@ -1,26 +1,32 @@
-function result = AssociateToExistingBB( foundBB, existingBB, colorRange )
+function result = AssociateToExistingBBHistogram( foundBB, existingBB, colorRange, existingFrame, currentFrame, bins)
 %ASSOCIATETOEXISTINGBB associate found BB to existing BB by finding the
-%existing BB with the max overlapping ratio. If no existing BB fits then
+%existing BB with the max histogram matching. If no existing BB fits then
 %the found BB is colored in a new color
-%   AssociateToExistingBB( foundBB, existingBB, colorRange )
+% AssociateToExistingBBHistogram( foundBB, existingBB, colorRange, existingFrame, currentFrame )
 availableColors = 1 : colorRange;
 availableColors(ismember(availableColors, existingBB(:,6))) = [];
 coloredFoundBB = zeros([size(foundBB, 1) 6], 'int32');
 coloredFoundBB(:,1:4) = foundBB(:,1:4);
 for i = 1 : size(coloredFoundBB, 1)
     currColFoundBB = coloredFoundBB(i,:);
-    maxOverlapRatio = 0;
+    currFoundBBNormHist = NormalizedHistogramBB(currColFoundBB, currentFrame, bins);
+    maxMatchRatio = 0;
+    matchIndex = -1;
     for j = 1 : size(existingBB, 1)
         currExistingBB = existingBB(j,:);
-        overlapRatio = BBOverlapRatio(currColFoundBB, currExistingBB);
-        if (overlapRatio > maxOverlapRatio)
-            coloredFoundBB(i,6) = existingBB(j,6);
-            maxOverlapRatio = overlapRatio;
+        currExistingBBNormHist = NormalizedHistogramBB(currExistingBB, existingFrame, bins);
+        matchRatio = BBMatchRatio(currFoundBBNormHist, currExistingBBNormHist);
+        if (matchRatio > maxMatchRatio)
+            matchIndex = j;
+            maxMatchRatio = matchRatio;
         end
     end
-    if (coloredFoundBB(i,6) == 0)
+    
+    if (matchIndex == -1)
         coloredFoundBB(i,6) = availableColors(1);
         availableColors(1) = [];
+    else
+        coloredFoundBB(i,6) = existingBB(matchIndex,6);
     end
 end
 
@@ -33,6 +39,7 @@ if (size(coloredFoundBB, 1) > 0)
     for i = 1 : maxColorIndex
         sameColorBB = coloredFoundBB(coloredFoundBB(:,6) == i, :);
         numberOfItems = size(sameColorBB);
+        % If there is more than 1 BB we will check for the best fit
         if (numberOfItems > 1)
             coloredFoundBB(coloredFoundBB(:,6) == i, :) = [];
             unitedColoredBB = UniteOverlappingBB(sameColorBB);
@@ -47,8 +54,22 @@ if (size(coloredFoundBB, 1) > 0)
                         maxRatio = currentRatio;
                     end
                 end
+                bestResult = unitedColoredBB(maxRatioIndex,:);
+                unitedColoredBB(maxRatioIndex,:) = [];
+                coloredFoundBB = vertcat(coloredFoundBB, bestResult);
+                unmatchedExistingBB = existingBB(~ismember(existingBB(:,6), coloredFoundBB(:,6)),:);
                 for j = 1 : size(unitedColoredBB, 1)
-                    if (j ~= maxRatioIndex)
+                    unitedColoredBB(j, 6) = -1;
+                    maxRatioOverlap = 0;
+                    for k = 1 : size(unmatchedExistingBB,1)
+                        ratioOverlap = BBOverlapRatio(unmatchedExistingBB(k,:), unitedColoredBB(j, :));
+                        if (ratioOverlap > maxRatioOverlap)
+                            unitedColoredBB(j, 6) = unmatchedExistingBB(k, 6);
+                            unmatchedExistingBB(k, 6) = -1;
+                            maxRatioOverlap = ratioOverlap;
+                        end
+                    end
+                    if (unitedColoredBB(j, 6) == -1)
                         unitedColoredBB(j, 6) = availableColors(1);
                         availableColors(1) = [];
                     end

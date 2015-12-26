@@ -2,13 +2,14 @@ function result = UniteOverlappingBB( coloredBB )
 %UniteOverlappingBB( coloredBB ) Unit BB with high overlapping under the
 %premise that it is noise
 
-threshold = 0.1;
+threshold = 0.05;
 
 for i = 1 : size(coloredBB, 1)
     currentBB = coloredBB(i,:);
     for j = i + 1: size(coloredBB, 1)
         checkedBB = coloredBB(j, :);
-        if (BBOverlapRatio(currentBB, checkedBB) > threshold)
+        overlapRatio = BBOverlapRatio(currentBB, checkedBB);
+        if (overlapRatio > threshold)
             minX = min(currentBB(1), checkedBB(1));
             minY = min(currentBB(2), checkedBB(2));
 
