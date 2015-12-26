@@ -19,6 +19,6 @@ function result = BBOverlapRatio(BBox1, BBox2)
     if (sharedArea <= 0)
         result = 0;
     else
-       result =  double(sharedArea) / double(sumOfBB);
+       result =  2*double(sharedArea) / double(sumOfBB);
     end
 end

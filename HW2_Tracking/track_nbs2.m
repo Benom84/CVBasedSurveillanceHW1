@@ -1,47 +1,38 @@
-function result = track_nbs2new(VideoMat, BlobSize, nbs_binary)
+function result = track_nbs2(VideoMat, BlobSize, VideoNatBinary)
 
 MatDim = size(VideoMat);
-if (nargin < 3)
-    
-    result = zeros(MatDim(1), MatDim(2), MatDim(3), MatDim(4), 'int32');
-    C = 0;
-    O = 1;
-    N = 100;
-    Mean = 1;
-    Threshold = 45;
-    LearningRate = 0.0001;
-   
-    nbs = NaiveBS(VideoMat,C,O,N,Mean,Threshold,LearningRate);
-    fprintf('filling holes, reducing noise\n');
-    nbs_binary = bwareaopen(imfill(nbs, 'holes'), 30, 8);
-end
+result = zeros(MatDim(1), MatDim(2), MatDim(3), MatDim(4), 'int32');
+
  blobAnalyzer = vision.BlobAnalysis('BoundingBoxOutputPort', true, ...
         'AreaOutputPort', true, 'CentroidOutputPort', true, ...
         'MinimumBlobArea', BlobSize);
     
 fprintf('Drawing rectangels\n');
 ColorsMatrix = [unique(perms([0 0 255]), 'rows'); unique(perms([0 255 255]), 'rows'); [255 255 255]; unique(perms([127 0 0]), 'rows');...
-    unique(perms([127 127 0]), 'rows');[127 127 127];unique(perms([50 100 200]), 'rows');];
+    unique(perms([127 127 0]), 'rows');[127 127 127];unique(perms([50 100 200]),...
+    'rows');unique(perms([25 50 100]), 'rows');unique(perms([25 75 200]), 'rows');];
 
 
-[~, ~, currentFoundBB] = blobAnalyzer.step(nbs_binary(:,:,1));
+[~, ~, currentFoundBB] = blobAnalyzer.step(VideoNatBinary(:,:,1));
 FoundColored = ColoredBoundingBoxes(currentFoundBB, ColorsMatrix);
 BBHistory1 = zeros([size(FoundColored, 1) 6], 'int32');
 BBHistory1(:,1:4) = FoundColored(:,1:4);
 BBHistory1(:,6) = FoundColored(:,5);
 BBHistory2 = BBHistory1;
-ImageBounds = [size(nbs_binary,2) size(nbs_binary,1)];
 WeaknessThresholdShow = 10;
-WeaknessThresholdDel = 50;
+WeaknessThresholdDel = 20;
 for i = 1 : MatDim(4)
-    [~, ~, currentFoundBB] = blobAnalyzer.step(nbs_binary(:,:,i));
-    
+    [~, ~, currentFoundBB] = blobAnalyzer.step(VideoNatBinary(:,:,i));
+    if (i == 191)
+        i
+    end
     % We will create a new BB representation x,y,sizeX,sizeY,Weakness,Color
     % Predict
-    coloredCurrentFoundBB = AssociateToExistingBB(currentFoundBB, BBHistory1, size(ColorsMatrix, 1));
-    coloredCurrentFoundBB = AssociateToExistingBB(coloredCurrentFoundBB, BBHistory1, size(ColorsMatrix, 1));
-    %coloredCurrentFoundBB = UniteOverlappingBB(coloredCurrentFoundBB);
-    predictedBB = PredictBB(BBHistory2, BBHistory1, coloredCurrentFoundBB, size(ColorsMatrix, 1));
+    predictedBB = PredictBB(BBHistory2, BBHistory1, size(ColorsMatrix, 1));
+    %coloredCurrentFoundBB = AssociateToExistingBB(currentFoundBB, BBHistory1, size(ColorsMatrix, 1));
+    %coloredCurrentFoundBB = AssociateToExistingBB(coloredCurrentFoundBB, BBHistory1, size(ColorsMatrix, 1));
+    coloredCurrentFoundBB = AssociateToExistingBB(currentFoundBB, predictedBB, size(ColorsMatrix, 1));
+    %predictedBB = PredictBB(BBHistory2, BBHistory1, coloredCurrentFoundBB, size(ColorsMatrix, 1));
     calculatedCurrentBB = CalculateBB(coloredCurrentFoundBB, predictedBB);
     calculatedCurrentBB(calculatedCurrentBB(:,5) > WeaknessThresholdDel, :) = [];
     BBHistory1(BBHistory1(:,5) > WeaknessThresholdDel - 1, :) = [];

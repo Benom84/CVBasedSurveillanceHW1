@@ -1,11 +1,10 @@
-function predictedBoundingBoxes = PredictBB(FromBB, ToBB, FoundBB, colorRange)
+function predictedBoundingBoxes = PredictBB(FromBB, ToBB, colorRange ,imageBounds)
 %PredictBB (FromBB, ToBB, FoundBB, colorRange) - Calculates the motion of a
 %bounding box based on its center and size in 2 frames. Uses the FoundBB
 %and colorRange to color BB that are only in one of the frames.
 %   Detailed explanation goes here
 
 availableColors = 1 : colorRange;
-availableColors(ismember(availableColors, FoundBB(:,6))) = [];
 availableColors(ismember(availableColors, FromBB(:,6))) = [];
 availableColors(ismember(availableColors, ToBB(:,6))) = [];
 
@@ -33,13 +32,21 @@ for i = 1 : size(ToBB, 1)
         newXsize = currToBB(3)*2 - currFromBB(3);
         newYsize = currToBB(4)*2 - currFromBB(4);
         
+       
         % Calculate the left upper corner of the box
         newXpos = newCenteroidX - floor(newXsize / 2);
         newYpos = newCenteroidY - floor(newYsize / 2);
         
         % Check the bounding box do not exceed the image
-        newXpos = max(newXpos, 1);
-        newYpos = max(newYpos, 1);
+        newXpos = min(max(newXpos, 1), imageBounds(1));
+        newYpos = min(max(newYpos, 1), imageBounds(2));
+        
+        if (newXpos + newXsize > imageBounds(1))
+            newXsize = imageBounds(1) - newXpos + 1;
+        end
+        if (newYpos + newYsize > imageBounds(2))
+            newYsize = imageBounds(2) - newYpos + 1;
+        end
         
         % If the size is not illegal we add the prediction
         if (newXsize > 0) && (newYsize > 0)
