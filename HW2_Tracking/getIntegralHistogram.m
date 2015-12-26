@@ -13,9 +13,6 @@ for i = 1:NUM_OF_BINS
     edge_low = edges(i);
     edge_high = edges(i+1);
     
-    %this matrix puts zeros where the values aren't in the range between
-    %the edges
-    %bin_values_matrix = region.*uint8(((region >= edge_low) & (region < edge_high)));
     bin_count_matrix = ((region >= edge_low) & (region < edge_high));
     
     %build and insert the bin integral image to the integral histogram.
