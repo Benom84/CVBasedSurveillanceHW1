@@ -18,7 +18,10 @@ ColorsMatrix = [unique(perms([0 0 255]), 'rows'); unique(perms([0 255 255]), 'ro
 %'ColorsMatrix'. The column is 'blob number'. The purpose of this matrix is
 %to keep for each blob the same bounding-box color while tracking.
 [~, ~, bboxes] = blobAnalyzer.step(VideoMatBinary(:,:,1));
-ColoredBoundingBoxMatrix = ColoredBoundingBoxes(bboxes, ColorsMatrix);
+ColoredBoundingBoxMatrix = zeros([size(bboxes, 1) 6], 'int32');
+ColoredBoundingBoxMatrix(:,1:4) = bboxes;
+ColoredBoundingBoxMatrix(:,6) = (1 : size(bboxes, 1))';
+%ColoredBoundingBoxMatrix = ColoredBoundingBoxes(bboxes, ColorsMatrix);
 
 %For each frame, draw a bounding-box around tracked blobs.
 for i=1 : MatDim(4)
@@ -26,7 +29,7 @@ for i=1 : MatDim(4)
 
     %'ColoredBoundingBoxes' function keeps the same color for the same
     %blob.
-    currentFoundBB = zeros([size(bboxes, 1) 6], 'uint8');
+    currentFoundBB = zeros([size(bboxes, 1) 6], 'int32');
     currentFoundBB(:,1:4) = bboxes(:,:);
     ColoredBoundingBoxMatrix = AssociateToExistingBB(currentFoundBB, ColoredBoundingBoxMatrix, size(ColorsMatrix, 1));
     

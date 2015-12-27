@@ -1,7 +1,7 @@
 reader = VideoReader('./data/PETS2014-0101-3.avi');
 origVideo = reader.read();
 origVideo = imresize(origVideo, 0.75);
-C = 0; O = 1; N = 100; Mean = 1; Threshold = 50; LearningRate = 0.0001;
+C = 0; O = 1; N = 100; Mean = 1; Threshold = 45; LearningRate = 0.01;
 blobSize = 400;
 
 %'nbs' is a mtrix which holds the naive background subtraction from HW1.

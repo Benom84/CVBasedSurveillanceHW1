@@ -12,13 +12,13 @@ ColorsMatrix = [unique(perms([0 0 255]), 'rows'); unique(perms([0 255 255]), 'ro
     unique(perms([127 127 0]), 'rows');[127 127 127];unique(perms([50 100 200]),...
     'rows');unique(perms([25 50 100]), 'rows');unique(perms([25 75 200]), 'rows');];
 
-trackedBBNormalizedHist = zeros([size(ColorsMatrix, 1) 48], 'double');
-
 [~, ~, currentFoundBB] = blobAnalyzer.step(VideoMatBinary(:,:,1));
-FoundColored = ColoredBoundingBoxes(currentFoundBB, ColorsMatrix);
+FoundColored = zeros([size(currentFoundBB, 1) 6], 'int32');
+FoundColored(:,1:4) = currentFoundBB;
+FoundColored(:,6) = (1 : size(currentFoundBB, 1))';
 BBHistory1 = zeros([size(FoundColored, 1) 6], 'int32');
 BBHistory1(:,1:4) = FoundColored(:,1:4);
-BBHistory1(:,6) = FoundColored(:,5);
+BBHistory1(:,6) = FoundColored(:,6);
 BBHistory2 = BBHistory1;
 imageBounds = [size(VideoMat,2) size(VideoMat,1)];
 WeaknessThresholdShow = 10;
@@ -26,10 +26,6 @@ WeaknessThresholdDel = 20;
 bins = 96;
 for i = 1 : MatDim(4)
     [~, ~, currentFoundBB] = blobAnalyzer.step(VideoMatBinary(:,:,i));
-    i
-    if (i == 350)
-        i
-    end
     % We will create a new BB representation x,y,sizeX,sizeY,Weakness,Color
     % Predict
     if (usePrediction)
