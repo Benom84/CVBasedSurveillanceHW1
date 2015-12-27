@@ -1,4 +1,4 @@
-NUM_OF_BINS = 6;
+NUM_OF_BINS = 5;
 
 %--------------------------------------------------------------------------
 % creating objects to track
@@ -10,23 +10,31 @@ NUM_OF_BINS = 6;
 %--------------------------------------------------------------------------
 objects = struct('coords', {}, ...
                  'histogram', {}, ...
-                 'frames', {}, ...
                  'color', {}, ...
                  'size', {}, ...
-                 'search_region_bounding_box', {});
+                 'search_region_bounding_box', {}, ...
+                 'offline_count', {}, ...
+                 'avg_difference', {}, ...
+                 'is_offline', {});
 
 %location of the model [left top right bottom]
 objects(1).coords = [413 213 442 291];
-objects(1).frames = struct('start', 1, 'end', 27);
 objects(1).color = 'red';
+objects(1).offline_count = 0;
+objects(1).avg_difference = 0;
+objects(1).is_offline = 0;
 
 objects(2).coords = [344 232 347 244];
-objects(2).frames = struct('start', 1, 'end', 19);
 objects(2).color = 'blue';
+objects(2).offline_count = 0;
+objects(2).avg_difference = 0;
+objects(2).is_offline = 0;
 
 objects(3).coords = [374 229 380 240];
-objects(3).frames = struct('start', 1, 'end', 11);
 objects(3).color = 'green';
+objects(3).offline_count = 0;
+objects(3).avg_difference = 0;
+objects(3).is_offline = 0;
 %--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
@@ -43,9 +51,10 @@ for i = 1:orig_video_size(4)
     scaled_orig_video(:,:,:,i) = imresize(uint8(orig_video(:,:,:,i)), 0.5);
 end
 
-processed_frames = [1 30];
-
+processed_frames = [1 40];
 check_proximity = 0;
+gap_limit = 0.2;
+offline_count_limit = 3;
 
-new_video = integralHistogramTracking(NUM_OF_BINS,objects,processed_frames,scaled_orig_video, check_proximity);
+new_video = integralHistogramTracking(NUM_OF_BINS, objects ,processed_frames, scaled_orig_video, check_proximity, gap_limit, offline_count_limit);
 %--------------------------------------------------------------------------

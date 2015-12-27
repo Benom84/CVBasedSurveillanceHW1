@@ -1,4 +1,4 @@
-function [new_video] = integralHistogramTracking(NUM_OF_BINS, objects, processed_frames, scaled_orig_video, check_proximity)
+function [new_video] = integralHistogramTracking(NUM_OF_BINS, objects, processed_frames, scaled_orig_video, check_proximity, gap_limit, offline_count_limit)
 
 scaled_orig_video_size = size(scaled_orig_video);
 new_video = zeros([scaled_orig_video_size(1), scaled_orig_video_size(2), scaled_orig_video_size(3), processed_frames(2)-processed_frames(2)+1], 'uint8');
@@ -29,7 +29,7 @@ new_video(:,:,:,1) = prev_frame_painted;
 % From the 2nd frame and on, perform an exhaustive search for the model,
 % and update it with the closest model we found during this search.
 %--------------------------------------------------------------------------
-
+avg = 0;
 for i = 1+processed_frames(1):processed_frames(2)
     fprintf('processing frame #%d / %d\n', i-processed_frames(1)+1, processed_frames(2)-processed_frames(1)+1);
     cur_frame = scaled_orig_video(:,:,:,i);
@@ -44,8 +44,9 @@ for i = 1+processed_frames(1):processed_frames(2)
         %Do not process the histogram if the object we track shouldnt
         %appear there. Therefore, the search for the object will be done
         %only between its frames range.
-        if (i < objects(o).frames.start || i >= objects(o).frames.end)
-            new_video(:,:,:,i) = cur_frame;
+        %if (i < objects(o).frames.start || i >= objects(o).frames.end)
+        if (objects(o).is_offline == 1)
+            new_video(:,:,:,i-processed_frames(1)+1) = cur_frame;
             continue;
         end
         
@@ -64,7 +65,21 @@ for i = 1+processed_frames(1):processed_frames(2)
         search_region_ih = getIntegralHistogram(search_region_area, NUM_OF_BINS);
         
         %find the new model in the new frame (the closest match to the model)
-        [cur_model_histogram, cur_coords] = findBestIhModel(search_region_ih, objects(o).size, objects(o).histogram, NUM_OF_BINS);
+        [cur_model_histogram, cur_coords, difference] = findBestIhModel(search_region_ih, objects(o).size, objects(o).histogram, NUM_OF_BINS);
+        
+        if (objects(o).avg_difference ~= 0)
+            gap = difference - avg;
+            objects(o).avg_difference = objects(o).avg_difference*0.95 + difference*0.05;
+            if (gap > gap_limit)
+                objects(o).offline_count = objects(o).offline_count + 1;
+                if (objects(o).offline_count >= offline_count_limit)
+                    objects(o).is_offline = 1;
+                end
+            end
+        else
+            objects(o).avg_difference = difference;
+        end
+        
         cur_coords = [search_region_box(1)+cur_coords(1) ...
                          search_region_box(2)+cur_coords(2) ...
                          search_region_box(1)+cur_coords(3) ...
@@ -75,22 +90,27 @@ for i = 1+processed_frames(1):processed_frames(2)
         cur_frame_painted = insertShape(cur_frame_painted, 'Rectangle', bbox, 'LineWidth', 2,'color', objects(o).color);
         
         %update the model to track on.
-        objects(o).histogram = cur_model_histogram;
+        %objects(o).histogram = cur_model_histogram;
         objects(o).coords = cur_coords;
     end
     
-    if (check_proximity == 1 && BoundingBoxOverlap(objects(1).search_region_bounding_box, objects(2).search_region_bounding_box) == 1)
-        x1 = ceil((objects(1).coords(1) + objects(1).coords(3)) / 2);
-        y1 = ceil((objects(1).coords(2) + objects(1).coords(4)) / 2);
-        x2 = ceil((objects(2).coords(1) + objects(2).coords(3)) / 2);
-        y2 = ceil((objects(2).coords(2) + objects(2).coords(4)) / 2);
-        cur_frame_painted = insertShape(cur_frame_painted, 'Line', [x1 y1 x2 y2], 'color', 'red');
+    %Alert on proximity between objects
+    if (check_proximity == 1)
+        for o1 = 1:numel(objects)
+            for o2 = o1+1:numel(objects)
+                if (BoundingBoxOverlap(objects(o1).search_region_bounding_box, objects(o2).search_region_bounding_box) == 1 && ...
+                        objects(o1).is_offline == 0 && objects(o2).is_offline == 0)
+                    x1 = ceil((objects(o1).coords(1) + objects(o1).coords(3)) / 2);
+                    y1 = ceil((objects(o1).coords(2) + objects(o1).coords(4)) / 2);
+                    x2 = ceil((objects(o2).coords(1) + objects(o2).coords(3)) / 2);
+                    y2 = ceil((objects(o2).coords(2) + objects(o2).coords(4)) / 2);
+                    cur_frame_painted = insertShape(cur_frame_painted, 'Line', [x1 y1 x2 y2], 'color', 'red');
+                end
+            end
+        end
     end
     
     new_video(:,:,:,i-processed_frames(1)+1) = cur_frame_painted;
-    if (i == 380)
-        i
-    end
 end
 
 end
