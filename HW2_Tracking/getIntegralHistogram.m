@@ -1,5 +1,12 @@
 function integral_histogram = getIntegralHistogram(region, NUM_OF_BINS)
-
+%{
+Build integral histogram for a given region.
+input:
+    - region : the region the integral histogram is built for.
+    - NUM_OF_BINS : the bins number to put in the histogram.
+outpout:
+    - integral_histogram : the region's integral histogram.
+%}
 
 %region histogram
 [bins, edges] = histcounts(region, NUM_OF_BINS);
